@@ -1,0 +1,93 @@
+# 🎙️₦ Voice Budget
+
+**Talk your money. E go arrange am.**
+
+A voice-first budgeting web app for Nigerians. Speak or type in **English or Pidgin**, and the app records your income, spending and savings, sorts each spend into the right pot, and tells you what you can safely spend today.
+
+> "Salary don land, 200k" · "I chop 1,500 for mama put" · "I enter keke 800 and buy data 2k" · "Wetin remain for my feeding?"
+
+## What it does (v0.1)
+
+| Feature | How |
+|---|---|
+| 🔒 **Savings vault** | Starting savings are kept apart. Taking money out needs a written reason. |
+| 💰 **Income** | "Salary don land 200k", "I collect 70k today". "Salary 200" is read as ₦200,000 (with a warning). |
+| 🎯 **Budget pots** | Data, Transport, Feeding, Rent, Power, Family, Giving, Enjoyment, Self-care, Other. Fully editable; add your own. Set them by voice: "put 20k for data, 60k for transport". |
+| 🧾 **Spending by voice** | Several items in one sentence, "yesterday", "last Friday", "2k", "1.5k", "fifty thousand", "₦2,500". |
+| ✅ **Confirmation card** | Nothing is saved until you check it. Fix amount, pot, note or date with one tap. |
+| 📊 **Safe to spend today** | Money left in your pots ÷ days left in your budget month. Alerts at 50%, 80% and 100%. |
+| ❓ **Ask questions** | "Wetin remain for feeding?", "How much I don spend on transport this week?" |
+| ↩️ **Corrections** | "Cancel am", "No be dat one", "Change am to 3k". |
+| 📅 **Budget month** | From payday (e.g. the 25th) or calendar month. Leftovers roll over or go to savings. |
+| 🔊 **Talk back** | Optional spoken replies. Replies in Pidgin or English. |
+| 📴 **Works offline** | Installable on your phone's home screen. Data stays on the phone, with backup and restore. |
+
+## How the "understanding" works
+
+1. **Voice → text:** the browser's built-in speech recognition (free; Chrome on Android works best; accent set to English (Nigeria)).
+2. **Text → money entry:** a built-in **Naija money parser** (`src/lib/parser.ts` + `src/lib/dictionary.ts`). Instant, free, offline, with 47 tests of real Pidgin and English sentences.
+3. **Claude as backup (optional):** when the local parser is unsure, the app asks Claude through `api/parse.ts`. This only runs if you deploy to Vercel with an `ANTHROPIC_API_KEY`.
+4. **The maths is never done by AI.** All totals come from plain code (`src/lib/engine.ts`).
+
+## Run it in VS Code
+
+You need **Node.js 20+** ([nodejs.org](https://nodejs.org)) and **Git**.
+
+```bash
+git clone https://github.com/Okiejoedev/voice-budget-app.git
+cd voice-budget-app
+code .            # opens VS Code
+npm install
+npm run dev       # opens on http://localhost:5173
+```
+
+- **On your phone (same Wi-Fi):** `npm run dev` also prints a `Network:` address like `http://192.168.x.x:5173`. Note that phones only allow the microphone on **https** or localhost, so for voice on your phone use the Vercel link below.
+- **Run the tests:** `npm test`
+- **Production build:** `npm run build`
+
+## Put it online (free) with Vercel
+
+1. Go to [vercel.com](https://vercel.com) → sign in with GitHub → **Add New → Project** → import `voice-budget-app`.
+2. Leave the defaults (Vercel detects Vite) → **Deploy**. You get an `https://….vercel.app` link with voice working on your phone.
+3. *(Optional, switches on Claude for tricky sentences)* Project → **Settings → Environment Variables** → add `ANTHROPIC_API_KEY` (from [console.anthropic.com](https://console.anthropic.com)) → **Redeploy**.
+4. On your phone, open the link in Chrome → ⋮ menu → **Add to Home screen**.
+
+Every `git push` to `main` redeploys automatically.
+
+## Project map
+
+```
+src/
+  lib/
+    dictionary.ts   Naija money words: pots, income, plan, savings, questions, undo
+    money.ts        "2k", "fifty thousand", "₦2,500" → numbers; dates like "yesterday"
+    parser.ts       Sentence → intent + items (offline)
+    parser.test.ts  47 tests with real English/Pidgin phrases
+    understand.ts   Local parser first, Claude fallback, output safety checks
+    engine.ts       Budget periods, pots, safe-to-spend, alerts, replies
+    store.ts        Saves data on the phone (localStorage)
+    speech.ts       Microphone + talk-back
+  components/       Onboarding, Home, Plan, History, Settings, ConfirmSheet
+api/parse.ts        Vercel serverless function that calls Claude (optional)
+public/             App icons, manifest, offline service worker
+```
+
+## Privacy
+
+- Data is stored **only in the browser on your phone**. There's no server database yet.
+- Voice is turned into text by the browser's speech service (Google, in Chrome). The app keeps only the text.
+- When Claude is switched on, only the sentence and your pot names are sent, never your balances.
+- Before opening this to other users: add a privacy notice (NDPA 2023/GAID 2025 + GDPR), consent, data export/delete (export already exists), and server-side storage with login.
+
+## Roadmap
+
+- [ ] Accounts and cloud sync (Supabase) so data survives a phone change
+- [ ] Debts: "I borrow Tunde 5k"
+- [ ] Several money sources: cash, Opay, GTB, PiggyVest
+- [ ] Share a bank SMS alert into the app to log it
+- [ ] Weekly voice summary; payday split template
+- [ ] Android app (Expo) and a WhatsApp front door
+- [ ] Yoruba, Igbo and Hausa words
+
+---
+Built by Joseph Okeoma (Okiejoe) with Claude.
