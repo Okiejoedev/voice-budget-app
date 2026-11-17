@@ -45,7 +45,18 @@ npm run dev       # opens on http://localhost:5173
 - **Run the tests:** `npm test`
 - **Production build:** `npm run build`
 
-## Put it online (free) with Vercel
+## Put it online (free) with GitHub Pages
+
+The repo has a workflow (`.github/workflows/deploy-pages.yml`) that builds, tests and publishes the app on every push to `main`.
+
+1. One-time setup: on GitHub open the repo → **Settings → Pages** → under **Build and deployment → Source**, choose **GitHub Actions**.
+2. Go to the **Actions** tab → **Deploy to GitHub Pages** → **Run workflow** (or just push a change).
+3. When it turns green, the app is live at **https://okiejoedev.github.io/voice-budget-app/**.
+4. On your phone, open that link in Chrome → ⋮ menu → **Add to Home screen**.
+
+GitHub Pages only hosts static files, so the optional Claude fallback (`api/parse.ts`) doesn't run there. The built-in Naija parser handles everything, offline and free. Use Vercel (below) if you want the Claude fallback.
+
+## Or put it online (free) with Vercel
 
 1. Go to [vercel.com](https://vercel.com) → sign in with GitHub → **Add New → Project** → import `voice-budget-app`.
 2. Leave the defaults (Vercel detects Vite) → **Deploy**. You get an `https://….vercel.app` link with voice working on your phone.

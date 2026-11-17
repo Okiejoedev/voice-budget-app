@@ -8,6 +8,7 @@ import { toISODate } from './money';
 
 const INTENTS: Intent[] = ['expense', 'income', 'plan', 'vault_in', 'vault_out', 'question', 'undo', 'edit_last', 'unknown'];
 let aiStatus: Promise<boolean> | null = null;
+const API = `${import.meta.env.BASE_URL}api/parse`; // only exists on Vercel; on GitHub Pages the offline parser does everything
 
 /** Checks once whether the /api/parse endpoint exists and has a key. */
 export function aiAvailable(): Promise<boolean> {
@@ -16,7 +17,7 @@ export function aiAvailable(): Promise<boolean> {
       try {
         const ctrl = new AbortController();
         const timer = setTimeout(() => ctrl.abort(), 3000);
-        const res = await fetch('/api/parse', { signal: ctrl.signal });
+        const res = await fetch(API, { signal: ctrl.signal });
         clearTimeout(timer);
         if (!res.ok) return false;
         const data = (await res.json()) as { ok?: boolean };
@@ -45,7 +46,7 @@ export async function understand(text: string, state: AppState, today = new Date
 async function parseWithAI(text: string, state: AppState, today: Date): Promise<ParseResult | null> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 12000);
-  const res = await fetch('/api/parse', {
+  const res = await fetch(API, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     signal: ctrl.signal,
