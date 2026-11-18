@@ -7,7 +7,7 @@ import { AmountInput } from './AmountInput';
 interface Props { state: AppState; update: (fn: (s: AppState) => AppState) => void }
 
 const TYPE_LABEL: Record<Transaction['type'], string> = {
-  expense: 'Spent', income: 'Income', vault_in: 'Saved', vault_out: 'From savings',
+  expense: 'Spent', income: 'Income', vault_in: 'Into Kolo', vault_out: 'From Kolo',
 };
 
 export function History({ state, update }: Props) {
@@ -28,12 +28,13 @@ export function History({ state, update }: Props) {
 
   return (
     <div className="history">
-      <div className="seg small">
+      <h1 className="page-title">History</h1>
+      <div className="seg">
         {(['all', 'expense', 'income', 'vault_in', 'vault_out'] as const).map((f) => (
           <button key={f} className={filter === f ? 'on' : ''} onClick={() => setFilter(f)}>{f === 'all' ? 'All' : TYPE_LABEL[f]}</button>
         ))}
       </div>
-      {txs.length === 0 && <p className="muted center">Nothing yet. Tap the mic and talk.</p>}
+      {txs.length === 0 && <div className="empty" style={{ marginTop: 14 }}><p className="muted">Nothing here yet. Tap the yellow button and say what you spent.</p></div>}
       {[...groups.entries()].map(([date, list]) => (
         <section key={date}>
           <h3 className="date-head">{dateLabel(date)}</h3>
@@ -46,10 +47,10 @@ export function History({ state, update }: Props) {
                   <span className="tx-icon">{t.type === 'expense' ? pot(t.potId)?.emoji ?? '🧾' : t.type === 'income' ? '💰' : '🔒'}</span>
                   <span className="tx-main">
                     <span className="tx-note">{t.note || pot(t.potId)?.name || TYPE_LABEL[t.type]}</span>
-                    <span className="tx-sub">{t.type === 'expense' ? pot(t.potId)?.name ?? 'Other' : TYPE_LABEL[t.type]}{t.said ? ` · “${t.said}”` : ''}</span>
+                    <span className="tx-sub">{t.type === 'expense' ? pot(t.potId)?.name ?? 'Other' : TYPE_LABEL[t.type]}{t.said ? `, “${t.said}”` : ''}</span>
                   </span>
                   <span className={`tx-amt ${t.type === 'expense' || t.type === 'vault_out' ? 'out' : 'in'}`}>
-                    {t.type === 'expense' || t.type === 'vault_out' ? '-' : '+'}{formatNaira(t.amount)}
+                    {t.type === 'expense' || t.type === 'vault_out' ? '−' : '+'}{formatNaira(t.amount)}
                   </span>
                 </button>
               )}
@@ -74,9 +75,9 @@ function TxEditor({ t, state, onSave, onCancel, onDelete }: { t: Transaction; st
       <input value={x.note} placeholder="Note" onChange={(e) => setX({ ...x, note: e.target.value })} />
       <input type="date" value={x.date} onChange={(e) => setX({ ...x, date: e.target.value || t.date })} />
       <div className="sheet-actions">
-        <button className="danger" onClick={onDelete}>Delete</button>
-        <button onClick={onCancel}>Cancel</button>
-        <button className="primary" disabled={x.amount <= 0} onClick={() => onSave(x)}>Save</button>
+        <button className="btn danger" onClick={onDelete}>Delete</button>
+        <button className="btn" onClick={onCancel}>Cancel</button>
+        <button className="btn primary" disabled={x.amount <= 0} onClick={() => onSave(x)}>Save</button>
       </div>
     </div>
   );

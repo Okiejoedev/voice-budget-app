@@ -8,16 +8,16 @@ const EDITABLE: { id: Intent; label: string }[] = [
   { id: 'expense', label: 'Spent' },
   { id: 'income', label: 'Income' },
   { id: 'plan', label: 'Budget plan' },
-  { id: 'vault_in', label: 'Save' },
-  { id: 'vault_out', label: 'From savings' },
+  { id: 'vault_in', label: 'Into Kolo' },
+  { id: 'vault_out', label: 'From Kolo' },
 ];
 
 const TITLES: Partial<Record<Intent, string>> = {
   expense: 'Money spent',
   income: 'Money in',
   plan: 'Set your budget',
-  vault_in: 'Add to savings',
-  vault_out: 'Take from savings',
+  vault_in: 'Put into your Kolo',
+  vault_out: 'Take from your Kolo',
 };
 
 interface Props {
@@ -40,7 +40,7 @@ export function ConfirmSheet({ state, result, lastTx, onConfirm, onCancel }: Pro
   if (r.intent === 'undo' || r.intent === 'edit_last') {
     return (
       <Sheet onCancel={onCancel}>
-        <div className="heard">You said: “{r.original}”</div>
+        <div className="heard">You said “{r.original}”</div>
         {!lastTx && <p>Nothing to {r.intent === 'undo' ? 'delete' : 'change'} yet.</p>}
         {lastTx && (
           <>
@@ -52,9 +52,9 @@ export function ConfirmSheet({ state, result, lastTx, onConfirm, onCancel }: Pro
           </>
         )}
         <div className="sheet-actions">
-          <button onClick={onCancel}>No</button>
-          <button className={r.intent === 'undo' ? 'danger' : 'primary'} disabled={!lastTx} onClick={() => onConfirm(r)}>
-            {r.intent === 'undo' ? 'Yes, delete' : 'Yes, change'}
+          <button className="btn" onClick={onCancel}>Cancel</button>
+          <button className={`btn ${r.intent === 'undo' ? 'danger' : 'primary'}`} disabled={!lastTx} onClick={() => onConfirm(r)}>
+            {r.intent === 'undo' ? 'Delete entry' : 'Change amount'}
           </button>
         </div>
       </Sheet>
@@ -68,7 +68,7 @@ export function ConfirmSheet({ state, result, lastTx, onConfirm, onCancel }: Pro
 
   return (
     <Sheet onCancel={onCancel}>
-      <div className="heard">You said: “{r.original}”{r.via === 'ai' && <span className="ai-badge">AI</span>}</div>
+      <div className="heard">You said “{r.original}”{r.via === 'ai' && <span className="ai-badge">AI</span>}</div>
       <div className="type-switch">
         {EDITABLE.map((t) => (
           <button key={t.id} className={r.intent === t.id ? 'on' : ''} onClick={() => setR({ ...r, intent: t.id })}>{t.label}</button>
@@ -76,14 +76,14 @@ export function ConfirmSheet({ state, result, lastTx, onConfirm, onCancel }: Pro
       </div>
       <h2>{TITLES[r.intent] ?? 'Check this'}</h2>
       {r.warnings.map((w) => <div className="warning" key={w}>⚠️ {w}</div>)}
-      {r.intent === 'vault_out' && <div className="warning">🔒 This is your savings. Write the reason you need it.</div>}
+      {r.intent === 'vault_out' && <div className="warning">This is your savings. Write why you need it before taking it out.</div>}
 
       <div className="items">
         {r.items.map((it, i) => (
           <div className="item" key={i}>
             <div className="item-row">
               <AmountInput value={it.amount} onChange={(n) => setItem(i, { amount: n })} ariaLabel="Amount" />
-              {r.items.length > 1 && <button className="icon" aria-label="Remove item" onClick={() => setR({ ...r, items: r.items.filter((_, j) => j !== i) })}>✕</button>}
+              {r.items.length > 1 && <button className="icon-btn" aria-label="Remove item" onClick={() => setR({ ...r, items: r.items.filter((_, j) => j !== i) })}>✕</button>}
             </div>
             {needsPot && (
               <select value={it.potId ?? ''} onChange={(e) => setItem(i, { potId: e.target.value })} aria-label="Pot">
@@ -105,15 +105,15 @@ export function ConfirmSheet({ state, result, lastTx, onConfirm, onCancel }: Pro
             {r.intent !== 'plan' && it.date !== today && <small className="muted">{dateLabel(it.date)}</small>}
           </div>
         ))}
-        <button className="link" onClick={() => setR({ ...r, items: [...r.items, { amount: 0, potId: needsPot ? undefined : undefined, note: '', date: today }] })}>+ Add another</button>
+        <button className="link" onClick={() => setR({ ...r, items: [...r.items, { amount: 0, note: '', date: today }] })}>+ Add another</button>
       </div>
 
       {r.items.length > 1 && r.intent !== 'plan' && <div className="total-row"><span>Total</span><b>{formatNaira(total)}</b></div>}
       {r.intent === 'plan' && <p className="muted small">This sets each pot's monthly budget to the amount shown.</p>}
 
       <div className="sheet-actions">
-        <button onClick={onCancel}>Cancel</button>
-        <button className="primary" disabled={!valid} onClick={() => onConfirm(r)}>✓ Save</button>
+        <button className="btn" onClick={onCancel}>Cancel</button>
+        <button className="btn primary" disabled={!valid} onClick={() => onConfirm(r)}>Save</button>
       </div>
     </Sheet>
   );

@@ -20,7 +20,17 @@ A voice-first budgeting web app for Nigerians. Speak or type in **English or Pid
 | ↩️ **Corrections** | "Cancel am", "No be dat one", "Change am to 3k". |
 | 📅 **Budget month** | From payday (e.g. the 25th) or calendar month. Leftovers roll over or go to savings. |
 | 🔊 **Talk back** | Optional spoken replies. Replies in Pidgin or English. |
-| 📴 **Works offline** | Installable on your phone's home screen. Data stays on the phone, with backup and restore. |
+| 📴 **Works offline** | Installable on your phone's home screen. Saves instantly on the phone and syncs to your account when online. |
+
+## Accounts and sync (v0.2)
+
+- **Continue with Google** (Supabase Auth), or **use without an account**. Guest data moves into the account when you sign in later.
+- **Offline-first:** every change is saved on the phone instantly, then uploaded to Supabase in the background. It works without data and catches up when you're back online. Changes made on another device are pulled in when the app reopens.
+- **Database:** Supabase Postgres (London), tables `profiles`, `pots`, `transactions`. Row Level Security means each user can only ever read or change their own rows.
+- **Delete my account** calls the `delete-account` edge function, which removes the user and every row they own.
+- **Privacy notice:** `public/privacy.html` (NDPA 2023 / GAID 2025 + GDPR).
+
+Supabase project: `voice-budget` (`maqsukzzzmxntxvzhtpy`). The URL and publishable key in `src/lib/config.ts` are public by design; override them with `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` if needed.
 
 ## How the "understanding" works
 
@@ -85,14 +95,14 @@ public/             App icons, manifest, offline service worker
 
 ## Privacy
 
-- Data is stored **only in the browser on your phone**. There's no server database yet.
+- Guests: data is stored **only in the browser on the phone**. Signed-in users: also in Supabase (London), protected by Row Level Security.
 - Voice is turned into text by the browser's speech service (Google, in Chrome). The app keeps only the text.
 - When Claude is switched on, only the sentence and your pot names are sent, never your balances.
-- Before opening this to other users: add a privacy notice (NDPA 2023/GAID 2025 + GDPR), consent, data export/delete (export already exists), and server-side storage with login.
+- Privacy notice, data download and account deletion are built in.
 
 ## Roadmap
 
-- [ ] Accounts and cloud sync (Supabase) so data survives a phone change
+- [x] Accounts and cloud sync (Supabase + Google sign-in)
 - [ ] Debts: "I borrow Tunde 5k"
 - [ ] Several money sources: cash, Opay, GTB, PiggyVest
 - [ ] Share a bank SMS alert into the app to log it

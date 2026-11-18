@@ -46,6 +46,7 @@ export interface AppState {
   pots: Pot[];
   transactions: Transaction[];
   lastPeriodStart?: string; // used to detect when a new period begins
+  owner?: string | null; // Supabase user id this data belongs to; null/undefined = guest on this phone
 }
 
 // ---- Parser output ----
